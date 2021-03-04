@@ -68,7 +68,10 @@ impl<'p> Presenter<'p> {
         self.view.terminal.present();
     }
 
-    pub fn print_buffer(&mut self, buffer: &Buffer, buffer_data: &'p str, highlights: Option<&[Range]>, lexeme_mapper: Option<&'p mut dyn LexemeMapper>) -> Result<()> {
+    pub fn print_buffer(
+        &mut self, buffer: &Buffer, buffer_data: &'p str,
+        highlights: Option<&[Range]>, lexeme_mapper: Option<&'p mut dyn LexemeMapper>,
+    ) -> Result<()> {
         let scroll_offset = self.view.get_region(buffer)?.line_offset();
         let lines = LineIterator::new(buffer_data);
 
@@ -80,7 +83,7 @@ impl<'p> Presenter<'p> {
             &self.theme,
             &self.view.preferences.borrow(),
             self.view.get_render_cache(buffer)?,
-            &mut self.terminal_buffer
+            &mut self.terminal_buffer,
         ).render(lines, lexeme_mapper)?;
 
         Ok(())

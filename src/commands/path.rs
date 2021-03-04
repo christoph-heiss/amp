@@ -142,7 +142,7 @@ mod tests {
         super::accept_path(&mut app).unwrap();
 
         assert_eq!(
-            app.workspace.current_buffer().unwrap().syntax_definition.as_ref().unwrap().name,
+            app.workspace.current_buffer().unwrap().syntax_reference.as_ref().unwrap().name,
             "Rust"
         );
     }

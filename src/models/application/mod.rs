@@ -246,10 +246,13 @@ fn create_workspace(view: &mut View, preferences: &Preferences, args: &Vec<Strin
     // It's important to do this before opening buffers, as that's when syntax
     // definitions are associated; we want the complete set before that happens.
     let syntax_path = Preferences::syntax_path()?;
-    if let Err(e) = workspace.syntax_set.load_syntaxes(syntax_path, true) {
+
+    let mut syntax_set_builder = (*workspace.syntax_set).clone().into_builder();
+    if let Err(e) = syntax_set_builder.add_from_folder(syntax_path, true) {
         bail!("Failed to load user syntaxes: {:?}", e);
     }
-    workspace.syntax_set.link_syntaxes();
+
+    workspace.syntax_set = Rc::new(syntax_set_builder.build());
 
     // If the first argument was a directory, we've navigated into
     // it; skip it before evaluating file args, lest we interpret
@@ -264,7 +267,7 @@ fn create_workspace(view: &mut View, preferences: &Preferences, args: &Vec<Strin
 
         // Check if the user has provided any syntax preference for this file.
         // If not, a default one will be applied on calling workspace.add_buffer()
-        let syntax_definition =
+        let syntax_reference =
             preferences.syntax_definition_name(&path).and_then(|name| {
                 workspace.syntax_set.find_syntax_by_name(&name).cloned()
             });
@@ -273,12 +276,14 @@ fn create_workspace(view: &mut View, preferences: &Preferences, args: &Vec<Strin
         // create a new buffer pointing to it if it doesn't.
         let argument_buffer = if path.exists() {
             let mut buffer = Buffer::from_file(path)?;
-            buffer.syntax_definition = syntax_definition;
+            buffer.syntax_set = Some(workspace.syntax_set.clone());
+            buffer.syntax_reference = syntax_reference;
 
             buffer
         } else {
             let mut buffer = Buffer::new();
-            buffer.syntax_definition = syntax_definition;
+            buffer.syntax_set = Some(workspace.syntax_set.clone());
+            buffer.syntax_reference = syntax_reference;
 
             // Point the buffer to the path, ensuring that it's absolute.
             if path.is_absolute() {
@@ -350,7 +355,7 @@ mod tests {
         let mut workspace = super::create_workspace(&mut view, &preferences.borrow(), &args).unwrap();
 
         assert_eq!(
-            workspace.current_buffer().unwrap().syntax_definition.as_ref().unwrap().name,
+            workspace.current_buffer().unwrap().syntax_reference.as_ref().unwrap().name,
             "Rust"
         );
     }

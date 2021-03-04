@@ -274,7 +274,7 @@ mod tests {
         // Build a render state.
         let theme_set = ThemeSet::load_defaults();
         let highlighter = Highlighter::new(&theme_set.themes["base16-ocean.dark"]);
-        let render_state = RenderState::new(&highlighter, buffer.syntax_definition.as_ref().unwrap());
+        let render_state = RenderState::new(&highlighter, buffer.syntax_reference.as_ref().unwrap());
 
         // Populate the render cache with some values.
         view.render_caches

@@ -1,5 +1,5 @@
 use syntect::highlighting::{Highlighter, HighlightState};
-use syntect::parsing::{ParseState, ScopeStack, SyntaxDefinition};
+use syntect::parsing::{ParseState, ScopeStack, SyntaxReference};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RenderState {
@@ -8,10 +8,10 @@ pub struct RenderState {
 }
 
 impl RenderState {
-    pub fn new(highlighter: &Highlighter, syntax: &SyntaxDefinition) -> RenderState {
+    pub fn new(highlighter: &Highlighter, syntax_ref: &SyntaxReference) -> RenderState {
         RenderState{
             highlight: HighlightState::new(&highlighter, ScopeStack::new()),
-            parse: ParseState::new(syntax)
+            parse: ParseState::new(syntax_ref)
         }
     }
 }

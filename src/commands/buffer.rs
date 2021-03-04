@@ -287,7 +287,9 @@ pub fn insert_char(app: &mut Application) -> Result {
 pub fn display_current_scope(app: &mut Application) -> Result {
     let scope_display_buffer = {
         let buffer = app.workspace.current_buffer().ok_or(BUFFER_MISSING)?;
-        let scope_stack = buffer.current_scope().chain_err(|| "No syntax definition for the current buffer")?;
+        let scope_stack = buffer.current_scope()
+            .chain_err(|| "No syntax definition for the current buffer")?;
+
         let mut scope_display_buffer = Buffer::new();
         for scope in scope_stack.as_slice().iter() {
             scope_display_buffer.insert(

@@ -39,10 +39,11 @@ pub struct BufferRenderer<'a, 'p> {
 
 impl<'a, 'p> BufferRenderer<'a, 'p> {
     pub fn new(buffer: &'a Buffer, highlights: Option<&'a [Range]>,
-    scroll_offset: usize, terminal: &'a dyn Terminal, theme: &'a Theme,
-    preferences: &'a Preferences,
-    render_cache: &'a Rc<RefCell<HashMap<usize, RenderState>>>,
-    terminal_buffer: &'a mut TerminalBuffer<'p>) -> BufferRenderer<'a, 'p> {
+               scroll_offset: usize, terminal: &'a dyn Terminal, theme: &'a Theme,
+               preferences: &'a Preferences,
+               render_cache: &'a Rc<RefCell<HashMap<usize, RenderState>>>,
+               terminal_buffer: &'a mut TerminalBuffer<'p>
+    ) -> BufferRenderer<'a, 'p> {
         let line_numbers = LineNumbers::new(&buffer, Some(scroll_offset));
         let gutter_width = line_numbers.width() + 1;
 
@@ -223,12 +224,13 @@ impl<'a, 'p> BufferRenderer<'a, 'p> {
         self.print_line_number();
 
         let highlighter = Highlighter::new(&self.theme);
-        let syntax_definition = self.buffer.syntax_definition.as_ref().ok_or("Buffer has no syntax definition")?;
+        let syntax_set = self.buffer.syntax_set.as_ref().ok_or("Buffer has no syntax definition")?;
+        let syntax_reference = self.buffer.syntax_reference.as_ref().ok_or("Buffer has no syntax definition")?;
 
         // Start or resume state from a previous cache point, if available.
         let (cached_line_no, mut state) = self
             .cached_render_state()
-            .unwrap_or((0, RenderState::new(&highlighter, syntax_definition)));
+            .unwrap_or((0, RenderState::new(&highlighter, syntax_reference)));
         let (focused_style, blurred_style) = self.mapper_styles();
 
         'print: for (line_no, line) in lines {
@@ -238,7 +240,7 @@ impl<'a, 'p> BufferRenderer<'a, 'p> {
                     self.render_cache.borrow_mut().insert(line_no, state.clone());
                 }
 
-                let events = state.parse.parse_line(line);
+                let events = state.parse.parse_line(line, syntax_set);
                 let styled_lexemes = HighlightIterator::new(
                     &mut state.highlight,
                     &events,
