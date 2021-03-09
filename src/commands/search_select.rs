@@ -24,7 +24,7 @@ pub fn accept(app: &mut Application) -> Result {
                 .selection()
                 .ok_or("Couldn't find a selected path to open")?;
 
-            let syntax_definition =
+            let syntax_reference =
                 app.preferences.borrow().syntax_definition_name(&path).and_then(|name| {
                     app.workspace.syntax_set.find_syntax_by_name(&name).cloned()
                 });
@@ -37,8 +37,8 @@ pub fn accept(app: &mut Application) -> Result {
 
             // Only override the default syntax definition if the user provided
             // a valid one in their preferences.
-            if syntax_definition.is_some() {
-                buffer.syntax_definition = syntax_definition;
+            if syntax_reference.is_some() {
+                buffer.syntax_reference = syntax_reference;
             }
 
             app.view.initialize_buffer(buffer)?;
@@ -61,12 +61,10 @@ pub fn accept(app: &mut Application) -> Result {
         },
         Mode::Syntax(ref mut mode) => {
             let name = mode.selection().ok_or("No syntax selected")?;
-            let syntax =
-                app.workspace.syntax_set.find_syntax_by_name(name).and_then(|s|
-                    Some(s.clone())
-                );
+            let syntax = app.workspace.syntax_set.find_syntax_by_name(name).cloned();
             let mut buffer = app.workspace.current_buffer().ok_or(BUFFER_MISSING)?;
-            buffer.syntax_definition = syntax;
+
+            buffer.syntax_reference = syntax;
         },
         _ => bail!("Can't accept selection outside of search select mode."),
     }

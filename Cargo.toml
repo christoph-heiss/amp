@@ -1,5 +1,4 @@
 [package]
-
 name = "amp"
 version = "0.6.2"
 authors = ["Jordan MacDonald <jordan@wastedintelligence.com>"]
@@ -17,14 +16,13 @@ regex = "1.4.2"
 
 [dependencies]
 app_dirs = "1.2.1"
-scribe = "0.7.2"
 pad = "0.1.4"
 bloodhound = "0.5.4"
 luthor = "0.1.7"
 fragment = "0.3.1"
 regex = "1.4.2"
 libc = "0.2.4"
-syntect = "2.1.0"
+syntect = "4.5.0"
 termion = "1.5.1"
 error-chain = "0.12.4"
 unicode-segmentation = "1.0.1"
@@ -33,6 +31,10 @@ yaml-rust = ">= 0.4.5"
 smallvec = "0.4.3"
 lazy_static = "1.2.0"
 mio = "0.6"
+
+[dependencies.scribe]
+git = "https://github.com/christoph-heiss/scribe.git"
+branch = "syntect-update"
 
 [dependencies.signal-hook]
 version = "0.1.9"
