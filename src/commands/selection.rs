@@ -82,15 +82,11 @@ fn copy_to_clipboard(app: &mut Application) -> Result {
         }
         Mode::SelectLine(ref mode) => {
             let selected_range = util::inclusive_range(
-                &LineRange::new(
-                    mode.anchor,
-                    buffer.cursor
-                    .line
-                ),
+                &LineRange::new(mode.anchor, buffer.cursor.line),
                 buffer
             );
 
-            let data = buffer.read(&selected_range.clone())
+            let data = buffer.read(&selected_range)
                 .ok_or("Couldn't read selected data from buffer")?;
             app.clipboard.set_content(ClipboardContent::Block(data))?;
         }
@@ -98,6 +94,45 @@ fn copy_to_clipboard(app: &mut Application) -> Result {
     };
 
     Ok(())
+}
+
+pub fn sort_lines(app: &mut Application) -> Result {
+    let buffer = app.workspace.current_buffer().ok_or(BUFFER_MISSING)?;
+
+    let line_range = match app.mode {
+        Mode::SelectLine(ref mode) => {
+            util::inclusive_range(
+                &LineRange::new(mode.anchor, buffer.cursor.line),
+                buffer
+            )
+        },
+        _ => bail!("Can't sort lines outside of select line mode"),
+    };
+
+    // A temporary is needed to satisfy the lifetime checker
+    let lines = buffer.read(&line_range)
+        .ok_or("Couldn't read lines to sort from buffer")?;
+
+    let had_newline_at_end = lines.ends_with('\n');
+
+    let mut lines: Vec<&str> = lines
+        .split_terminator('\n')
+        .collect();
+
+    lines.sort();
+    let mut lines = lines.join("\n");
+
+    if had_newline_at_end {
+        lines.push('\n'); // Add final newline again
+    }
+
+    buffer.start_operation_group();
+    buffer.delete_range(line_range.clone());
+    buffer.cursor.move_to(line_range.start());
+    buffer.insert(lines);
+    buffer.end_operation_group();
+
+    application::switch_to_normal_mode(app)
 }
 
 #[cfg(test)]
