@@ -26,11 +26,14 @@ syntect = "4.5.0"
 termion = "1.5.1"
 error-chain = "0.12.4"
 unicode-segmentation = "1.0.1"
-clipboard = "0.4.4"
 yaml-rust = ">= 0.4.5"
 smallvec = "0.4.3"
 lazy_static = "1.2.0"
 mio = "0.6"
+
+[dependencies.clipboard]
+version = "0.5.0"
+optional = true
 
 [dependencies.scribe]
 git = "https://github.com/christoph-heiss/scribe.git"
@@ -48,6 +51,9 @@ default-features = false # removes unused openssl dependency
 
 [dev-dependencies]
 criterion = "0.2.0"
+
+[features]
+default = ["clipboard"]
 
 [[bench]]
 name = "draw_buffer"
